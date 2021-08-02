@@ -7,35 +7,29 @@
             <thead class="bg-gray-50">
               <tr>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th scope="col" class="relative px-6 py-3">
-                  <span class="sr-only">Edit</span>
-                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(person, personIdx) in people" :key="person.email" :class="personIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'">
+              <tr v-for="(result, index) in results" :key="result.id" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ person.number }}
+                  {{ result.id }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ person.name }}
+                  {{ result.title }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ person.title }}
+                  {{ result.assignee }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ person.email }}
+                  {{ result.completed }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ person.role }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                  <a href="#" class="px-6 text-indigo-600 hover:text-indigo-900">Delete</a>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                  <button class="px-6 text-red-600 hover:text-red-900">Delete</button>
                 </td>
               </tr>
             </tbody>
@@ -49,12 +43,6 @@
 <script>
 import axios from 'axios';
 
-const people = [
-  { number: 1, name: 'Jane Cooper', title: 'Regional Paradigm Technician', role: 'Admin', email: 'jane.cooper@example.com' },
-  { number: 2, name: 'Cody Fisher', title: 'Product Directives Officer', role: 'Owner', email: 'cody.fisher@example.com' }
-  // More people...
-];
-
 export default {
   async setup() {
     const { data: todos } = await axios.get('https://jsonplaceholder.typicode.com/todos');
@@ -62,12 +50,22 @@ export default {
     console.log(todos);
     console.log(users);
 
-    const userId = todos.map(todo => {
-      return todo.userId;
-    });
-    console.log(userId);
+    const results = [];
+
+    async function mappingIds(todos) {
+      await todos.map(todo => {
+        results.push({
+          // userIds start from 1 but we need to start from 0
+          assignee: users[todo.userId - 1].name,
+          ...todo
+        });
+      });
+    }
+    mappingIds(todos);
+    console.log(results);
+
     return {
-      people
+      results
     };
   }
 };
