@@ -1,5 +1,7 @@
 <template>
-  <BaseTable />
+  <Suspense>
+    <BaseTable />
+  </Suspense>
 </template>
 
 <script>
