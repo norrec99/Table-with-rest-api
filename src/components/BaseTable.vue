@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 const people = [
   { number: 1, name: 'Jane Cooper', title: 'Regional Paradigm Technician', role: 'Admin', email: 'jane.cooper@example.com' },
   { number: 2, name: 'Cody Fisher', title: 'Product Directives Officer', role: 'Owner', email: 'cody.fisher@example.com' }
@@ -54,7 +56,16 @@ const people = [
 ];
 
 export default {
-  setup() {
+  async setup() {
+    const { data: todos } = await axios.get('https://jsonplaceholder.typicode.com/todos');
+    const { data: users } = await axios.get('https://jsonplaceholder.typicode.com/users');
+    console.log(todos);
+    console.log(users);
+
+    const userId = todos.map(todo => {
+      return todo.userId;
+    });
+    console.log(userId);
     return {
       people
     };
