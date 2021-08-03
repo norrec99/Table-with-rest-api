@@ -28,7 +28,7 @@
                 <td v-else class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">In Progress</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button @click="openTodo(result)" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                  <button class="px-6 text-red-600 hover:text-red-900">Delete</button>
+                  <button @click="deleteTodo(result.id)" class="px-6 text-red-600 hover:text-red-900">Delete</button>
                 </td>
               </tr>
             </tbody>
@@ -54,11 +54,11 @@ export default {
     console.log(todos);
     console.log(users);
 
-    const results = [];
+    const results = ref([]);
 
     async function mappingIds(todos) {
       await todos.map(todo => {
-        results.push({
+        results.value.push({
           // userIds start from 1 but we need to start from 0
           assignee: users[todo.userId - 1].name,
           ...todo
@@ -66,7 +66,7 @@ export default {
       });
     }
     mappingIds(todos);
-    console.log(results);
+    console.log(results.value);
 
     function openTodo(result) {
       console.log('clicked');
@@ -74,10 +74,25 @@ export default {
       console.log(openedTodo.value);
     }
 
+    function deleteTodo(id) {
+      axios
+        .delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
+        .then(() => {
+          let z = results.value.map(results => results.id).indexOf(id);
+          results.value.splice(z, 1);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+      console.log(id);
+      console.log(todos);
+    }
+
     return {
       results,
       openTodo,
-      openedTodo
+      openedTodo,
+      deleteTodo
     };
   },
   components: {
