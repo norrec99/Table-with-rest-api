@@ -27,7 +27,7 @@
                 <td v-if="result.completed" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Done</td>
                 <td v-else class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">In Progress</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                  <button @click="openTodo(result)" class="text-indigo-600 hover:text-indigo-900">Edit</button>
                   <button class="px-6 text-red-600 hover:text-red-900">Delete</button>
                 </td>
               </tr>
@@ -37,13 +37,18 @@
       </div>
     </div>
   </div>
+  <EditModal v-if="openedTodo" :todo="openedTodo" />
 </template>
 
 <script>
 import axios from 'axios';
+import { ref } from 'vue';
+
+import EditModal from '@/components/EditModal';
 
 export default {
   async setup() {
+    let openedTodo = ref(null);
     const { data: todos } = await axios.get('https://jsonplaceholder.typicode.com/todos');
     const { data: users } = await axios.get('https://jsonplaceholder.typicode.com/users');
     console.log(todos);
@@ -63,9 +68,20 @@ export default {
     mappingIds(todos);
     console.log(results);
 
+    function openTodo(result) {
+      console.log('clicked');
+      openedTodo.value = result;
+      console.log(openedTodo.value);
+    }
+
     return {
-      results
+      results,
+      openTodo,
+      openedTodo
     };
+  },
+  components: {
+    EditModal
   }
 };
 </script>
