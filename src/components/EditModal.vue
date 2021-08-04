@@ -65,27 +65,18 @@ export default {
     const open = ref(true);
     // eslint-disable-next-line vue/no-setup-props-destructure
     const result = props.todo;
-    console.log('***********');
-    console.log(result);
-    console.log('***********');
     const title = ref(result.title);
-    console.log(title.value);
 
     async function saveTodo(id) {
       await axios
         .patch(`https://jsonplaceholder.typicode.com/todos/${id}`, { title: title.value })
         .then(function (response) {
-          console.log('******************');
           emit('updateItem', response.data);
-          console.log(response);
-          console.log('******************');
           open.value = false;
         })
         .catch(function (error) {
           console.log(error);
         });
-      console.log(id);
-      console.log(title.value);
     }
 
     return {
