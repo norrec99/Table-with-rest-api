@@ -37,7 +37,7 @@
       </div>
     </div>
     <Pagination :todos="todos" :pageNumber="pageNumber" @updatePageNumber="updatePageNumber" />
-    <EditModal v-if="openedTodo" :todo="openedTodo" @updateItem="updateItem" />
+    <EditModal v-if="openedTodo && isClosed" :todo="openedTodo" @updateItem="updateItem" />
   </div>
 </template>
 
@@ -51,6 +51,7 @@ import Pagination from '@/components/Pagination';
 export default {
   async setup() {
     const openedTodo = ref(null);
+    const isClosed = ref(false);
     const { data: todosResponse } = await axios.get('https://jsonplaceholder.typicode.com/todos');
     const { data: usersResponse } = await axios.get('https://jsonplaceholder.typicode.com/users');
 
@@ -78,6 +79,8 @@ export default {
     function openTodo(result) {
       console.log('clicked');
       openedTodo.value = result;
+      isClosed.value = !isClosed.value;
+      console.log('is closed ? ', isClosed.value);
       console.log(openedTodo.value);
     }
 
@@ -109,7 +112,8 @@ export default {
       currentTodos,
       users,
       updatePageNumber,
-      pageNumber
+      pageNumber,
+      isClosed
     };
   },
   components: {
