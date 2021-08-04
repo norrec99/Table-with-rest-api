@@ -37,7 +37,7 @@
       </div>
     </div>
   </div>
-  <button @click="updateCurrentTodos">page</button>
+  <Pagination :todos="todos" @updateCurrentTodos="updateCurrentTodos" @previousTodos="previousTodos" />
   <EditModal v-if="openedTodo" :todo="openedTodo" @updateItem="updateItem" />
 </template>
 
@@ -46,14 +46,13 @@ import axios from 'axios';
 import { ref } from 'vue';
 
 import EditModal from '@/components/EditModal';
+import Pagination from '@/components/Pagination';
 
 export default {
   async setup() {
     let openedTodo = ref(null);
     const { data: todosResponse } = await axios.get('https://jsonplaceholder.typicode.com/todos');
     const { data: usersResponse } = await axios.get('https://jsonplaceholder.typicode.com/users');
-    console.log(todosResponse);
-    console.log(usersResponse);
 
     const pageNumber = ref(0);
     const todos = ref(todosResponse);
@@ -70,7 +69,7 @@ export default {
     //   });
     // }
     // mappingIds(todosResponse);
-    console.log(todos.value);
+    // console.log(todos.value);
 
     function updateCurrentTodos() {
       let endIndex = pageNumber.value * 10 + 10;
@@ -80,6 +79,17 @@ export default {
       }
       currentTodos.value = todos.value.slice(startIndex, endIndex);
       pageNumber.value++;
+    }
+    function previousTodos() {
+      if (pageNumber.value > 0) {
+        pageNumber.value--;
+      }
+      let endIndex = pageNumber.value * 10 + 10;
+      let startIndex = pageNumber.value * 10;
+      if (endIndex > todos.value.length) {
+        endIndex = todos.value.length;
+      }
+      currentTodos.value = todos.value.slice(startIndex, endIndex);
     }
 
     updateCurrentTodos();
@@ -100,8 +110,6 @@ export default {
         .catch(error => {
           console.log(error);
         });
-      console.log(id);
-      console.log(todosResponse);
     }
 
     function updateItem(item) {
@@ -117,12 +125,14 @@ export default {
       deleteTodo,
       updateItem,
       updateCurrentTodos,
+      previousTodos,
       currentTodos,
       users
     };
   },
   components: {
-    EditModal
+    EditModal,
+    Pagination
   }
 };
 </script>
