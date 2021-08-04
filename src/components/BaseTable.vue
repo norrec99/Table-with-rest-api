@@ -36,7 +36,7 @@
         </div>
       </div>
     </div>
-    <Pagination :todos="todos" @updateCurrentTodos="updateCurrentTodos" @previousTodos="previousTodos" />
+    <Pagination :todos="todos" :pageNumber="pageNumber" @updatePageNumber="updatePageNumber" />
     <EditModal v-if="openedTodo" :todo="openedTodo" @updateItem="updateItem" />
   </div>
 </template>
@@ -50,7 +50,7 @@ import Pagination from '@/components/Pagination';
 
 export default {
   async setup() {
-    let openedTodo = ref(null);
+    const openedTodo = ref(null);
     const { data: todosResponse } = await axios.get('https://jsonplaceholder.typicode.com/todos');
     const { data: usersResponse } = await axios.get('https://jsonplaceholder.typicode.com/users');
 
@@ -59,31 +59,12 @@ export default {
     const currentTodos = ref([]);
     const users = ref(usersResponse);
 
-    // async function mappingIds(todosResponse) {
-    //   await todosResponse.map(todo => {
-    //     todos.value.push({
-    //       // userIds start from 1 but we need to start from 0
-    //       assignee: usersResponse[todo.userId - 1].name,
-    //       ...todo
-    //     });
-    //   });
-    // }
-    // mappingIds(todosResponse);
-    // console.log(todos.value);
+    function updatePageNumber(newPageNumber) {
+      pageNumber.value = newPageNumber;
+      updateCurrentTodos();
+    }
 
     function updateCurrentTodos() {
-      let endIndex = pageNumber.value * 10 + 10;
-      let startIndex = pageNumber.value * 10;
-      if (endIndex > todos.value.length) {
-        endIndex = todos.value.length;
-      }
-      currentTodos.value = todos.value.slice(startIndex, endIndex);
-      pageNumber.value++;
-    }
-    function previousTodos() {
-      if (pageNumber.value > 0) {
-        pageNumber.value--;
-      }
       let endIndex = pageNumber.value * 10 + 10;
       let startIndex = pageNumber.value * 10;
       if (endIndex > todos.value.length) {
@@ -125,9 +106,10 @@ export default {
       deleteTodo,
       updateItem,
       updateCurrentTodos,
-      previousTodos,
       currentTodos,
-      users
+      users,
+      updatePageNumber,
+      pageNumber
     };
   },
   components: {
