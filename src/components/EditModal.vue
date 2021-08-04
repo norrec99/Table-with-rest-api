@@ -29,7 +29,7 @@
             </div>
             <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
               <button @click="saveTodo(result.id)" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">Save</button>
-              <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm" @click="open = false">Cancel</button>
+              <button @click="open ? true : false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">Cancel</button>
             </div>
           </div>
         </TransitionChild>
@@ -60,7 +60,8 @@ export default {
     ExclamationIcon,
     XIcon
   },
-  async setup(props) {
+  emits: ['updateItem'],
+  async setup(props, { emit }) {
     const open = ref(true);
     // eslint-disable-next-line vue/no-setup-props-destructure
     const result = props.todo;
@@ -74,7 +75,11 @@ export default {
       await axios
         .patch(`https://jsonplaceholder.typicode.com/todos/${id}`, { title: title.value })
         .then(function (response) {
+          console.log('******************');
+          emit('updateItem', response.data);
           console.log(response);
+          console.log('******************');
+          open.value = false;
         })
         .catch(function (error) {
           console.log(error);

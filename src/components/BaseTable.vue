@@ -14,21 +14,21 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(result, index) in results" :key="result.id" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'">
+              <tr v-for="(todo, index) in currentTodos" :key="todo.id" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ result.id }}
+                  {{ todo.id }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ result.title }}
+                  {{ todo.title }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ result.assignee }}
+                  {{ users.find(user => user.id === todo.userId).name }}
                 </td>
-                <td v-if="result.completed" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Done</td>
+                <td v-if="todo.completed" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Done</td>
                 <td v-else class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">In Progress</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button @click="openTodo(result)" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                  <button @click="deleteTodo(result.id)" class="px-6 text-red-600 hover:text-red-900">Delete</button>
+                  <button @click="openTodo(todo)" class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                  <button @click="deleteTodo(todo.id)" class="px-6 text-red-600 hover:text-red-900">Delete</button>
                 </td>
               </tr>
             </tbody>
@@ -37,7 +37,8 @@
       </div>
     </div>
   </div>
-  <EditModal v-if="openedTodo" :todo="openedTodo" />
+  <button @click="updateCurrentTodos">page</button>
+  <EditModal v-if="openedTodo" :todo="openedTodo" @updateItem="updateItem" />
 </template>
 
 <script>
@@ -49,24 +50,39 @@ import EditModal from '@/components/EditModal';
 export default {
   async setup() {
     let openedTodo = ref(null);
-    const { data: todos } = await axios.get('https://jsonplaceholder.typicode.com/todos');
-    const { data: users } = await axios.get('https://jsonplaceholder.typicode.com/users');
-    console.log(todos);
-    console.log(users);
+    const { data: todosResponse } = await axios.get('https://jsonplaceholder.typicode.com/todos');
+    const { data: usersResponse } = await axios.get('https://jsonplaceholder.typicode.com/users');
+    console.log(todosResponse);
+    console.log(usersResponse);
 
-    const results = ref([]);
+    const pageNumber = ref(0);
+    const todos = ref(todosResponse);
+    const currentTodos = ref([]);
+    const users = ref(usersResponse);
 
-    async function mappingIds(todos) {
-      await todos.map(todo => {
-        results.value.push({
-          // userIds start from 1 but we need to start from 0
-          assignee: users[todo.userId - 1].name,
-          ...todo
-        });
-      });
+    // async function mappingIds(todosResponse) {
+    //   await todosResponse.map(todo => {
+    //     todos.value.push({
+    //       // userIds start from 1 but we need to start from 0
+    //       assignee: usersResponse[todo.userId - 1].name,
+    //       ...todo
+    //     });
+    //   });
+    // }
+    // mappingIds(todosResponse);
+    console.log(todos.value);
+
+    function updateCurrentTodos() {
+      let endIndex = pageNumber.value * 10 + 10;
+      let startIndex = pageNumber.value * 10;
+      if (endIndex > todos.value.length) {
+        endIndex = todos.value.length;
+      }
+      currentTodos.value = todos.value.slice(startIndex, endIndex);
+      pageNumber.value++;
     }
-    mappingIds(todos);
-    console.log(results.value);
+
+    updateCurrentTodos();
 
     function openTodo(result) {
       console.log('clicked');
@@ -78,21 +94,31 @@ export default {
       axios
         .delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
         .then(() => {
-          let z = results.value.map(results => results.id).indexOf(id);
-          results.value.splice(z, 1);
+          todos.value = todos.value.filter(item => item.id !== id);
+          updateCurrentTodos();
         })
         .catch(error => {
           console.log(error);
         });
       console.log(id);
-      console.log(todos);
+      console.log(todosResponse);
+    }
+
+    function updateItem(item) {
+      let index = todos.value.findIndex(todoItem => todoItem.id === item.id);
+      todos.value[index] = item;
+      updateCurrentTodos();
     }
 
     return {
-      results,
+      todos,
       openTodo,
       openedTodo,
-      deleteTodo
+      deleteTodo,
+      updateItem,
+      updateCurrentTodos,
+      currentTodos,
+      users
     };
   },
   components: {
