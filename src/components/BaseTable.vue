@@ -77,11 +77,8 @@ export default {
     updateCurrentTodos();
 
     function openTodo(result) {
-      console.log('clicked');
       openedTodo.value = result;
       isClosed.value = !isClosed.value;
-      console.log('is closed ? ', isClosed.value);
-      console.log(openedTodo.value);
     }
 
     function deleteTodo(id) {
