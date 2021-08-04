@@ -7,7 +7,7 @@
       </a>
     </div>
     <div class="hidden md:-mt-px md:flex">
-      <a v-for="pageNumber in pageNumbers" :key="pageNumber" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium cursor-pointer"> {{ pageNumber }} </a>
+      <a v-for="pageNumber in maxPageNumber" :key="pageNumber" @click="goToPage(pageNumber)" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium cursor-pointer"> {{ pageNumber }} </a>
 
       <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" -->
       <!-- <a href="#" class="border-indigo-500 text-indigo-600 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium" aria-current="page"> 2 </a>
@@ -27,7 +27,6 @@
 </template>
 
 <script>
-import { ref } from 'vue';
 import { ArrowNarrowLeftIcon, ArrowNarrowRightIcon } from '@heroicons/vue/solid';
 
 export default {
@@ -35,33 +34,34 @@ export default {
     todos: {
       type: Object,
       required: true
+    },
+    pageNumber: {
+      type: Number,
+      required: true
     }
   },
-  emits: ['updateCurrentTodos', 'previousTodos'],
+  emits: ['updatePageNumber'],
   setup(props, { emit }) {
-    const pageNumbers = ref([]);
-    const totalItem = ref(null);
     const maxItemPerPage = 10;
 
-    // eslint-disable-next-line vue/no-setup-props-destructure
-    const todoList = props.todos;
-    totalItem.value = todoList.length;
-    console.log(todoList);
-    console.log('total page number ', totalItem.value);
+    const maxPageNumber = props.todos.length / maxItemPerPage;
 
-    for (let i = 1; i <= totalItem.value / maxItemPerPage; i++) {
-      pageNumbers.value.push(i);
+    function goToPage(newPageNumber) {
+      emit('updatePageNumber', newPageNumber - 1);
     }
-    console.log('page number array ', pageNumbers.value);
 
     function goNextPage() {
-      emit('updateCurrentTodos');
+      if (props.pageNumber + 1 < maxPageNumber) {
+        emit('updatePageNumber', props.pageNumber + 1);
+      }
     }
     function goPreviousPage() {
-      emit('previousTodos');
+      if (props.pageNumber - 1 >= 0) {
+        emit('updatePageNumber', props.pageNumber - 1);
+      }
     }
 
-    return { goNextPage, goPreviousPage, pageNumbers };
+    return { goNextPage, goPreviousPage, goToPage, maxPageNumber };
   },
   components: {
     ArrowNarrowLeftIcon,
