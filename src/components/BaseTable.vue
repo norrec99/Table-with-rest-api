@@ -9,7 +9,11 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" @click="sortStatus" class="inline-flex px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                  <ArrowSmDownIcon v-if="isAscending" class="ml-3 h-5 w-5 text-gray-400" />
+                  <ArrowSmUpIcon v-else class="ml-3 h-5 w-5 text-gray-400" />
+                </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -48,6 +52,8 @@ import { ref } from 'vue';
 import EditModal from '@/components/EditModal';
 import Pagination from '@/components/Pagination';
 
+import { ArrowSmDownIcon, ArrowSmUpIcon } from '@heroicons/vue/solid';
+
 export default {
   async setup() {
     const openedTodo = ref(null);
@@ -59,6 +65,8 @@ export default {
     const todos = ref(todosResponse);
     const currentTodos = ref([]);
     const users = ref(usersResponse);
+
+    const isAscending = ref(false);
 
     function updatePageNumber(newPageNumber) {
       pageNumber.value = newPageNumber;
@@ -99,6 +107,18 @@ export default {
       updateCurrentTodos();
     }
 
+    function sortStatus() {
+      isAscending.value = !isAscending.value;
+      console.log('sorted');
+      if (isAscending.value === false) {
+        todos.value.sort((a, b) => a.completed - b.completed);
+      } else {
+        todos.value.sort((a, b) => b.completed - a.completed);
+      }
+      console.log(todos.value);
+      updateCurrentTodos();
+    }
+
     return {
       todos,
       openTodo,
@@ -110,12 +130,16 @@ export default {
       users,
       updatePageNumber,
       pageNumber,
-      isClosed
+      isClosed,
+      sortStatus,
+      isAscending
     };
   },
   components: {
     EditModal,
-    Pagination
+    Pagination,
+    ArrowSmDownIcon,
+    ArrowSmUpIcon
   }
 };
 </script>
