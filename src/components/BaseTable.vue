@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
     <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
       <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
         <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -36,9 +36,9 @@
         </div>
       </div>
     </div>
+    <Pagination :todos="todos" @updateCurrentTodos="updateCurrentTodos" @previousTodos="previousTodos" />
+    <EditModal v-if="openedTodo" :todo="openedTodo" @updateItem="updateItem" />
   </div>
-  <Pagination :todos="todos" @updateCurrentTodos="updateCurrentTodos" @previousTodos="previousTodos" />
-  <EditModal v-if="openedTodo" :todo="openedTodo" @updateItem="updateItem" />
 </template>
 
 <script>
